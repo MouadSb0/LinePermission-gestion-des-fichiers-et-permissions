@@ -1,3 +1,4 @@
+mouadtest:$2a$10$a6yOgPHIICfUIjdPcrOuq.l8my55e6/6dOtosiHXEFow7PgwqNhlm
 mouadSb:$2a$10$XCpnM7yQqR6YlWSXYqWqVe2B7DRnjDxFS5Z07prd8ym/C9hKlFCK6
 mouadsb:$2a$10$VhdbUs.ji7vAaCqwzK2ooe3fEVrINEVa.IGlL6909VZ6JS3iWuZnC
 mouadSab:$2a$10$mu9E.23mVeQHCTLHw13VLOdVXHrK0WOol5G5.ubY23hft6RJo5xH2
