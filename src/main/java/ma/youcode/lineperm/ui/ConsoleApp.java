@@ -3,6 +3,8 @@ package ma.youcode.lineperm.ui;
 import ma.youcode.lineperm.model.FichierProtege;
 import ma.youcode.lineperm.model.User;
 import ma.youcode.lineperm.service.FileService;
+import ma.youcode.lineperm.service.JournalService;
+import ma.youcode.lineperm.service.LogAnalyzer;
 import ma.youcode.lineperm.service.UserService;
 
 import java.util.Scanner;
@@ -10,6 +12,7 @@ import java.util.Scanner;
 public class ConsoleApp {
     private final UserService userService = new UserService();
     private final FileService fileService = new FileService();
+    private final LogAnalyzer logAnalyzer = new LogAnalyzer();
     private User currentUser = null;
     private final Scanner scanner = new Scanner(System.in);
 
@@ -51,6 +54,9 @@ public class ConsoleApp {
                     break;
                 case "chmod":
                     handleChmod(parts);
+                    break;
+                case "stats":
+                    handleStats();
                     break;
                 case "exit":
                     System.out.println("Au revoir !");
@@ -214,6 +220,7 @@ public class ConsoleApp {
         }
         // on verifie w avant de faire saisir le texte
         if (!fileService.peutEcrire(currentUser, nom)) {
+            JournalService.enregistrer(currentUser.getLogin(), "ECRITURE", nom, "REFUSE");
             printDenied();
             return;
         }
@@ -292,6 +299,62 @@ public class ConsoleApp {
             }
         } else {
             System.out.println(resultat);
+        }
+    }
+
+    private void handleStats() {
+        logAnalyzer.charger();
+        while (true) {
+            System.out.println();
+            System.out.println("=== Analyses du journal ===");
+            System.out.println("1. Nombre total d'actions");
+            System.out.println("2. Nombre d'acces refuses");
+            System.out.println("3. Utilisateurs distincts");
+            System.out.println("4. Actions par utilisateur");
+            System.out.println("5. Top 3 des fichiers consultes");
+            System.out.println("6. Acces refuses d'un utilisateur");
+            System.out.println("7. Utilisateur le plus actif");
+            System.out.println("8. Repartition des actions par type");
+            System.out.println("0. Retour");
+            System.out.print("Choix : ");
+
+            String saisie = scanner.nextLine().trim();
+            if (saisie.equals("0")) {
+                return;
+            }
+
+            System.out.println();
+            switch (saisie) {
+                case "1":
+                    logAnalyzer.afficherNombreTotalActions();
+                    break;
+                case "2":
+                    logAnalyzer.afficherNombreAccesRefuses();
+                    break;
+                case "3":
+                    logAnalyzer.afficherUtilisateursDistincts();
+                    break;
+                case "4":
+                    logAnalyzer.afficherActionsParUtilisateur();
+                    break;
+                case "5":
+                    logAnalyzer.afficherTop3Fichiers();
+                    break;
+                case "6":
+                    System.out.print("Nom de l'utilisateur : ");
+                    String nom = scanner.nextLine().trim();
+                    logAnalyzer.afficherAccesRefusesUtilisateur(nom);
+                    break;
+                case "7":
+                    logAnalyzer.afficherUtilisateurLePlusActif();
+                    break;
+                case "8":
+                    logAnalyzer.afficherRepartitionParType();
+                    break;
+                default:
+                    System.out.println("Choix inconnu.");
+                    break;
+            }
         }
     }
 }

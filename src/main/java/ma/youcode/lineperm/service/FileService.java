@@ -98,6 +98,7 @@ public class FileService {
         FichierProtege nouveau = new FichierProtege(nom, login);
         fichiers.add(nouveau);
         saveFichiers();
+        JournalService.enregistrer(login, "CREATION", nom, "OK");
         return "OK";
     }
 
@@ -108,14 +109,18 @@ public class FileService {
             return "NOT_FOUND";
         }
         if (!ControleAcces.estAutorise(user, f, 'r')) {
+            JournalService.enregistrer(user.getLogin(), "LECTURE", nom, "REFUSE");
             return null;
         }
         Path contenu = Paths.get(DATA_DIR).resolve(nom);
         try {
             if (!Files.exists(contenu)) {
+                JournalService.enregistrer(user.getLogin(), "LECTURE", nom, "OK");
                 return "";
             }
-            return Files.readString(contenu);
+            String texte = Files.readString(contenu);
+            JournalService.enregistrer(user.getLogin(), "LECTURE", nom, "OK");
+            return texte;
         } catch (IOException e) {
             return "";
         }
@@ -149,6 +154,7 @@ public class FileService {
             return "NOT_FOUND";
         }
         if (!ControleAcces.estAutorise(user, f, 'w')) {
+            JournalService.enregistrer(user.getLogin(), "ECRITURE", nom, "REFUSE");
             return "DENIED";
         }
         try {
@@ -162,6 +168,7 @@ public class FileService {
             return "Erreur lors de l'ecriture.";
         }
         saveFichiers();
+        JournalService.enregistrer(user.getLogin(), "ECRITURE", nom, "OK");
         return "OK";
     }
 
@@ -172,6 +179,7 @@ public class FileService {
             return "NOT_FOUND";
         }
         if (!ControleAcces.estProprietaire(user, f)) {
+            JournalService.enregistrer(user.getLogin(), "CHMOD", nom, "REFUSE");
             return "DENIED";
         }
         boolean deja = false;
@@ -188,6 +196,7 @@ public class FileService {
             return "UNKNOWN_RIGHT";
         }
         saveFichiers();
+        JournalService.enregistrer(user.getLogin(), "CHMOD", nom, "OK");
         if (deja) {
             return "ALREADY";
         }
@@ -200,6 +209,7 @@ public class FileService {
             return "NOT_FOUND";
         }
         if (!ControleAcces.estProprietaire(user, f)) {
+            JournalService.enregistrer(user.getLogin(), "CHMOD", nom, "REFUSE");
             return "DENIED";
         }
         boolean dejaAbsent = false;
@@ -216,6 +226,7 @@ public class FileService {
             return "UNKNOWN_RIGHT";
         }
         saveFichiers();
+        JournalService.enregistrer(user.getLogin(), "CHMOD", nom, "OK");
         if (dejaAbsent) {
             return "ALREADY";
         }

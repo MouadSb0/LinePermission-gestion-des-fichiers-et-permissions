@@ -1,4 +1,4 @@
-# LinePermission - Partie 2
+﻿# LinePermission - Partie 2
 
 Application console Java : authentification (partie 1) et gestion des fichiers
 avec permissions rwd (partie 2).
@@ -26,3 +26,7 @@ java -jar linepermission.jar
 ```
 
 Le fichier `lib/jbcrypt-0.4.jar` doit rester a cote du jar (Class-Path du manifest).
+
+## Statistiques
+
+- stats : ouvre le menu d'analyse des logs (nombre d'actions, refus, utilisateurs, top fichiers...)
