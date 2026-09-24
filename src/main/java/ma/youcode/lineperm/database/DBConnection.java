@@ -36,7 +36,10 @@ public final class DBConnection {
     }
 
     private static String getSetting(String name, String defaultValue) {
-        String value = System.getenv(name);
+        String value = System.getProperty(name);
+        if (value == null || value.trim().isEmpty()) {
+            value = System.getenv(name);
+        }
         return value == null || value.trim().isEmpty() ? defaultValue : value;
     }
 
