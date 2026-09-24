@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS fichiers (
     nom VARCHAR(255) NOT NULL,
     chemin VARCHAR(1000) NOT NULL UNIQUE,
     proprietaire_id INTEGER NOT NULL,
+    droits VARCHAR(255) NOT NULL DEFAULT '',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT ck_fichiers_nom_not_blank CHECK (length(trim(nom)) > 0),
     CONSTRAINT ck_fichiers_chemin_not_blank CHECK (length(trim(chemin)) > 0),

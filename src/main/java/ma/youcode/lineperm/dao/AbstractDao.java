@@ -58,6 +58,17 @@ public abstract class AbstractDao<T> implements Dao<T> {
                     "Cannot " + operation + " entity with id " + id + ": entity not found."
             );
         }
+
+    }
+
+    @Override
+    public void update(T entity) throws SQLException {
+        throw new UnsupportedOperationException("Update is not supported by this DAO.");
+    }
+
+    @Override
+    public void delete(int id) throws SQLException {
+        throw new UnsupportedOperationException("Delete is not supported by this DAO.");
     }
 
     @FunctionalInterface
