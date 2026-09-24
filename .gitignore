@@ -2,3 +2,7 @@ out/
 *.class
 .idea/
 *.iml
+lineperm.db
+lineperm.db-*
+access.log
+fichiers.txt
