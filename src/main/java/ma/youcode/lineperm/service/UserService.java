@@ -1,64 +1,58 @@
 package ma.youcode.lineperm.service;
 
+import ma.youcode.lineperm.dao.UserDao;
 import ma.youcode.lineperm.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.Optional;
 
 public class UserService {
-    private static final String STORAGE_FILE = "users.txt";
-    private final Map<String, User> usersByLogin = new HashMap<>();
+    private final UserDao userDao;
 
     public UserService() {
-        loadUsers();
+        this(new UserDao());
     }
 
-    // --- Chargement / sauvegarde ---
-
-    private void loadUsers() {
-        Path path = Paths.get(STORAGE_FILE);
-        if (!Files.exists(path)) {
-            return; 
-        }
-        try {
-            List<String> lines = Files.readAllLines(path);
-            for (String line : lines) {
-                if (line.trim().isEmpty()) continue;
-                String[] parts = line.split(":", 2); // login:hash
-                if (parts.length == 2) {
-                    String login = parts[0];
-                    String hash = parts[1];
-                    usersByLogin.put(login, new User(login, hash));
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Erreur lors du chargement des comptes : " + e.getMessage());
-        }
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
-    private void saveUsers() {
-        Path path = Paths.get(STORAGE_FILE);
-        StringBuilder sb = new StringBuilder();
-        for (User user : usersByLogin.values()) {
-            sb.append(user.getLogin()).append(":").append(user.getPasswordHash()).append("\n");
+    public User signup(String login, String password) throws SQLException {
+        validateCredentials(login, password);
+
+        if (userDao.findByLogin(login).isPresent()) {
+            throw new IllegalArgumentException("Ce login est déjà pris.");
         }
-        try {
-            Files.write(path, sb.toString().getBytes());
-        } catch (IOException e) {
-            System.err.println("Erreur lors de la sauvegarde : " + e.getMessage());
-        }
+
+        String hash = BCrypt.hashpw(password, BCrypt.gensalt());
+        return userDao.save(new User(login, hash));
     }
 
-    // --- Méthodes métier ---
+    public User login(String login, String password) throws SQLException {
+        if (login == null || password == null) {
+            return null;
+        }
 
-  
-    public void signup(String login, String password) {
+        Optional<User> user = userDao.findByLogin(login);
+        if (!user.isPresent()) {
+            return null;
+        }
+
+        return BCrypt.checkpw(password, user.get().getPasswordHash())
+                ? user.get()
+                : null;
+    }
+
+    public boolean userExists(String login) throws SQLException {
+        return login != null && userDao.findByLogin(login).isPresent();
+    }
+
+    public Optional<User> findById(int id) throws SQLException {
+        return userDao.findById(id);
+    }
+
+    private void validateCredentials(String login, String password) {
         if (login == null || login.trim().isEmpty()) {
             throw new IllegalArgumentException("Le login ne peut pas être vide.");
         }
@@ -68,34 +62,5 @@ public class UserService {
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
         }
-        if (usersByLogin.containsKey(login)) {
-            throw new IllegalArgumentException("Ce login est déjà pris.");
-        }
-
-        // Hachage du mot de passe
-        String salt = BCrypt.gensalt();
-        String hash = BCrypt.hashpw(password, salt);
-
-        User newUser = new User(login, hash);
-        usersByLogin.put(login, newUser);
-        saveUsers();
-    }
-
-  
-    public User login(String login, String password) {
-        if (login == null || password == null) {
-            return null;
-        }
-        User user = usersByLogin.get(login);
-        if (user == null) {
-            return null; 
-        }
-        // Vérification du mot de passe
-        boolean match = BCrypt.checkpw(password, user.getPasswordHash());
-        return match ? user : null;
-    }
-
-    public boolean userExists(String login) {
-        return usersByLogin.containsKey(login);
     }
 }
