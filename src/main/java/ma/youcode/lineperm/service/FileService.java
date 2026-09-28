@@ -171,7 +171,6 @@ public class FileService {
         JournalService.enregistrer(user.getLogin(), "ECRITURE", nom, "OK");
         return "OK";
     }
-
     // chmod n'agit que sur le bloc autres. Seul le proprietaire peut le faire.
     public String donnerDroit(User user, String nom, char droit) {
         FichierProtege f = trouver(nom);
