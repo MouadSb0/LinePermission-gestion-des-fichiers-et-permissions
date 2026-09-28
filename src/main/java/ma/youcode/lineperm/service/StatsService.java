@@ -1,4 +1,4 @@
-﻿package ma.youcode.lineperm.service;
+package ma.youcode.lineperm.service;
 
 import ma.youcode.lineperm.model.AccessLog;
 import java.util.List;
